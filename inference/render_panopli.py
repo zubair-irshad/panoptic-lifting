@@ -71,6 +71,7 @@ def render_panopli_checkpoint(config, trajectory_name, test_only=False):
             p_rgb, p_semantics, p_instances, p_dist = concated_outputs
 
             print("p_rgb", p_rgb.shape)
+            print("H, W", H, W)
             p_depth = distance_to_depth(test_set.intrinsics[0], p_dist.view(H, W))
             # create surrogate ids
             p_instances = create_instances_from_semantics(p_instances, p_semantics, test_set.segmentation_data.fg_classes)
