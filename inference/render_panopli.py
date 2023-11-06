@@ -103,7 +103,9 @@ if __name__ == "__main__":
     cfg = omegaconf.OmegaConf.load(Path(sys.argv[1]).parents[1] / "config.yaml")
     cfg.resume = sys.argv[1]
     test_mode = False if len(sys.argv) == 2 else sys.argv[2] == "True"
-    cfg.image_dim = [256, 384]
+    cfg.image_dim = [1080, 1920]
+    # cfg.image_dim = [256, 384]
+
     if isinstance(cfg.image_dim, int):
         cfg.image_dim = [cfg.image_dim, cfg.image_dim]
     if test_mode:
