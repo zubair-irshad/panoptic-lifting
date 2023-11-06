@@ -70,6 +70,8 @@ def render_panopli_checkpoint(config, trajectory_name, test_only=False):
                 concated_outputs.append(torch.cat([outputs[j][i] for j in range(len(outputs))], dim=0))
             p_rgb, p_semantics, p_instances, p_dist = concated_outputs
 
+            print("p_semantics", p_semantics.shape)
+            print("p_instances", p_instances.shape)
             print("p_rgb", p_rgb.shape)
             print("H, W", H, W)
             p_depth = distance_to_depth(test_set.intrinsics[0], p_dist.view(H, W))
