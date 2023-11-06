@@ -16,7 +16,7 @@ from model.renderer.panopli_tensoRF_renderer import TensoRFRenderer
 from trainer import visualize_panoptic_outputs
 from util.camera import distance_to_depth
 from util.misc import get_parameters_from_state_dict
-
+import time
 
 def render_panopli_checkpoint(config, trajectory_name, test_only=False):
     output_dir = (Path("runs") / f"{Path(config.dataset_root).stem}_{trajectory_name if not test_only else 'test'}_{Path(config.experiment)}")
@@ -59,12 +59,18 @@ def render_panopli_checkpoint(config, trajectory_name, test_only=False):
             concated_outputs = []
             outputs = []
             # infer semantics and surrogate ids
+            start_time = time.time()
             for i in range(0, batch['rays'].shape[0], config.chunk):
                 out_rgb_, out_semantics_, out_instances_, out_depth_, _, _ = renderer(model, batch['rays'][i: i + config.chunk], config.perturb, test_set.white_bg, False)
                 outputs.append([out_rgb_, out_semantics_, out_instances_, out_depth_])
+            print(f"Time for inference: {time.time() - start_time}")
+
+            
             for i in range(len(outputs[0])):
                 concated_outputs.append(torch.cat([outputs[j][i] for j in range(len(outputs))], dim=0))
             p_rgb, p_semantics, p_instances, p_dist = concated_outputs
+
+            print("p_rgb", p_rgb.shape)
             p_depth = distance_to_depth(test_set.intrinsics[0], p_dist.view(H, W))
             # create surrogate ids
             p_instances = create_instances_from_semantics(p_instances, p_semantics, test_set.segmentation_data.fg_classes)
