@@ -179,6 +179,9 @@ class TensoRFTrainer(pl.LightningModule):
             loss_instance_clustering = torch.zeros(1, device=self.device, requires_grad=True)
             for img_idx in range(len(batch[1]['rays'])):
                 instance_features = self.forward_instance(batch[1]['rays'][img_idx], True)
+                print("batch[1]['rays'][img_idx]", batch[1]['rays'][img_idx].shape)
+                print("instance_features", instance_features.shape)
+                print("batch[1]['instances'][img_idx]", batch[1]['instances'][img_idx].shape)
                 loss_instance_clustering_ = self.calculate_instance_clustering_loss(batch[1]['instances'][img_idx], instance_features, batch[1]['confidences'][img_idx])
                 loss_instance_clustering = loss_instance_clustering + loss_instance_clustering_
             self.manual_backward(loss_instance_clustering)
@@ -194,11 +197,19 @@ class TensoRFTrainer(pl.LightningModule):
 
     @torch.no_grad()
     def create_virtual_gt_with_linear_assignment(self, labels_gt, predicted_scores):
+        
         labels = sorted(torch.unique(labels_gt).cpu().tolist())[:predicted_scores.shape[-1]]
+
+        print("labels", labels)
+        print("predicted_scores", predicted_scores.shape)
         predicted_probabilities = torch.softmax(predicted_scores, dim=-1)
+        print("predicted_probabilities", predicted_probabilities.shape)
         cost_matrix = np.zeros([len(labels), predicted_probabilities.shape[-1]])
         for lidx, label in enumerate(labels):
             cost_matrix[lidx, :] = -(predicted_probabilities[labels_gt == label, :].sum(dim=0) / ((labels_gt == label).sum() + 1e-4)).cpu().numpy()
+
+        print("cost_matrix", cost_matrix.shape)
+        print("cost_matrix", cost_matrix)
         assignment = scipy.optimize.linear_sum_assignment(np.nan_to_num(cost_matrix))
         new_labels = torch.zeros_like(labels_gt)
         for aidx, lidx in enumerate(assignment[0]):
