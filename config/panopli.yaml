@@ -50,7 +50,7 @@ lambda_tv_semantics: 0.02
 lambda_tv_appearance: 0.01
 bbox_aabb_reset_epochs: [1,2,3]
 grid_upscale_epochs: [1,2,3,4]
-instance_optimization_epoch: 3
+instance_optimization_epoch: 1
 segment_optimization_epoch: 6
 
 perturb: 1.0
